@@ -126,4 +126,50 @@ describe("端到端 lib 流（认证先于入档）", () => {
     expect((caught as WalkViolationError).reason).toBe("into-wall");
     expect((caught as WalkViolationError).stepIndex).toBe(1);
   });
+
+  // 终审 F2：两次 keydown 落同一毫秒（快速双键换向真实可发生）→ 落步 t 相等
+  // → 走线认证 time-inconsistent 整局误拒。修复后引擎落步 t 单调（前步 t+1 钳位），
+  // 玩家无作弊不吃拒收：认证通过、正常入档。
+  it("同毫秒双键：落步 t 单调 → 认证通过 → 正常入档", () => {
+    const m0 = generatePack(1).find((m) => m.mapIndex === 0)!;
+    const spec = m0.spec;
+    const path = bfsPath(spec);
+
+    // 首两键同一毫秒：T0=1000 起表落首步（t=0），T0 再落第二步
+    let run = createRun(spec);
+    run = playerInput(run, dirOf(path[0]!, path[1]!), 1000);
+    run = playerInput(run, dirOf(path[1]!, path[2]!), 1000);
+    for (let i = 3; i < path.length; i++) {
+      run = playerInput(run, dirOf(path[i - 1]!, path[i]!), 1000 + i * REPEAT_MS);
+    }
+    expect(run.phase).toBe("finished");
+
+    // 相邻步 t 严格递增（含同毫秒双键产生的钳位步）
+    for (let i = 1; i < run.steps.length; i++) {
+      expect(run.steps[i]!.t).toBeGreaterThan(run.steps[i - 1]!.t);
+    }
+    expect(run.steps[run.steps.length - 1]!.t).toBe(run.result);
+
+    // 认证通过
+    expect(() => assertWalkLegal(spec, run.steps, run.result!)).not.toThrow();
+
+    // 正常入档：saveGhost → loadRecords → compareGhost 幽灵在位且走线全等
+    const storage = new MemoryStorage();
+    saveGhost(
+      storage,
+      {
+        packNo: m0.packNo,
+        mapIndex: m0.mapIndex,
+        gridHash: gridHash(spec.grid),
+        steps: run.steps,
+        result: { time: run.result! },
+      },
+      9999,
+    );
+    const reread = loadRecords(storage);
+    const { ghost } = compareGhost(reread, m0.packNo, m0.mapIndex, gridHash(spec.grid));
+    expect(ghost).not.toBeNull();
+    expect(ghost!.steps).toEqual(run.steps);
+    expect(ghost!.result.time).toBe(run.result);
+  });
 });

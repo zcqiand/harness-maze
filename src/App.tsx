@@ -134,7 +134,7 @@ function GameScreen(props: {
   const [ghost, setGhost] = useState<GhostRecord | null>(null);
   const [sealed, setSealed] = useState<GhostRecord | null>(null);
   const [finish, setFinish] = useState<FinishInfo | null>(null);
-  /** 完赛存档只跑一次的护栏（StrictMode 双调 effect 防重） */
+  /** 完赛存档只跑一次的护栏（StrictMode 双调 effect 防重；完赛 effect deps 含 ghost——入档后 setGhost 拽出的重入也靠本 ref 短路，认证/入档只落一次） */
   const savedRunRef = useRef<RunState | null>(null);
   /** onBack 经 ref 进 keydown 监听，避免每次 render 重挂 window 监听 */
   const onBackRef = useRef(props.onBack);

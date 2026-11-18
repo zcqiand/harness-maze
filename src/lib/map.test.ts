@@ -71,6 +71,18 @@ describe("validateMapSpec", () => {
     expect(validateMapSpec(spec)).toBe("goal-on-wall");
   });
 
+  // 终审 F1：越界（负 / ≥rows·cols）不得 TypeError 逃逸八枚举契约——
+  // 越界格「非 0 即墙」，同口径归 on-wall 枚举（walk.ts「越界归 into-wall」同款裁定）
+  it("start-on-wall：start 越界（负 r）归 start-on-wall，不抛 TypeError", () => {
+    const spec: MapSpec = { ...legalSpec, start: { r: -1, c: 1 } };
+    expect(validateMapSpec(spec)).toBe("start-on-wall");
+  });
+
+  it("goal-on-wall：goal 越界（c ≥ cols）归 goal-on-wall，不抛 TypeError", () => {
+    const spec: MapSpec = { ...legalSpec, goal: { r: 3, c: 5 } };
+    expect(validateMapSpec(spec)).toBe("goal-on-wall");
+  });
+
   it("start-equals-goal：start==goal", () => {
     const spec: MapSpec = { ...legalSpec, goal: { r: 1, c: 1 } };
     expect(validateMapSpec(spec)).toBe("start-equals-goal");

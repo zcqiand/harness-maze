@@ -51,8 +51,10 @@ export function validateMapSpec(spec: MapSpec): MapSpecError | null {
     if (grid[0][c] === 0 || grid[lastRow][c] === 0) return "no-border-wall";
   }
 
-  if (grid[start.r][start.c] === 1) return "start-on-wall";
-  if (grid[goal.r][goal.c] === 1) return "goal-on-wall";
+  // 越界（负 / ≥rows·cols）的格子「非 0 即墙」——可选链取不到值同归 on-wall 枚举，
+  // 不抛 TypeError 逃逸八枚举契约（map-spec.md 成文承诺；walk.ts「越界归 into-wall」同款口径）
+  if (grid[start.r]?.[start.c] !== 0) return "start-on-wall";
+  if (grid[goal.r]?.[goal.c] !== 0) return "goal-on-wall";
   if (start.r === goal.r && start.c === goal.c) return "start-equals-goal";
 
   if (!bfsSolvable(spec)) return "unsolvable";

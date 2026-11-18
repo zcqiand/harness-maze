@@ -52,7 +52,7 @@ export function createRun(spec: MapSpec): RunState {
 /**
  * ready+首输入：startedAt=nowMs 转 running；目标格合法则落首步 {t:0, cell}，
  * 撞墙则原地（steps 仍空，时钟已起——裁定 3 时钟不停）。
- * running：合法移动→落步 {t: nowMs-startedAt, cell}；撞墙→cell/steps 不变（时钟不停）。
+ * running：合法移动→落步 {t: max(nowMs-startedAt, 前步t+1), cell}（同毫秒双键钳位单调）；撞墙→cell/steps 不变（时钟不停）。
  * 到达 goal→finished，result=nowMs-startedAt，末步照落。
  * finished 后输入：原样返回（引用相等）。
  */
@@ -84,7 +84,12 @@ export function playerInput(run: RunState, dir: Dir, nowMs: number): RunState {
     return { ...run, nowMs };
   }
 
-  const t = nowMs - run.startedAt!;
+  // 落步 t 单调收口（终审 F2）：nowMs 注入的时钟不保证严格递增（同毫秒双键换向真实
+  // 可发生），t 相等会被 walk.ts time-inconsistent 整局误拒（玩家无作弊吃拒收）。
+  // 钳到 prevT+1 保严格递增；完赛 result 同取钳后 t，认证一致性（resultTime===末步 t）保持。
+  // 只用注入值，本模块仍零 Date.now；ghostCellAt「steps 严格递增可提前收」的前提由此加固。
+  const prevT = run.steps.length > 0 ? run.steps[run.steps.length - 1]!.t : -1;
+  const t = Math.max(nowMs - run.startedAt!, prevT + 1);
   const steps: Step[] = [...run.steps, { t, cell: target }];
   if (sameCell(target, run.spec.goal)) {
     return { ...run, phase: "finished", nowMs, cell: target, steps, result: t };
