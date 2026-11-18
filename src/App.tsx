@@ -109,8 +109,10 @@ interface FinishInfo {
   pb: GhostRecord | null;
   /** 认证入档成功且上位（重查后的 compareGhost 结果驱动——Task 5 挂账） */
   beatPb: boolean;
-  /** 该破 PB / 该首存但重查未见本局成绩 → 存储静默降级，成绩仅本局可见 */
+  /** 该破 PB / 该首存但重查未见本局成绩 → 存储静默降级，成绩仅本局可见（认证拒收不走此语义） */
   degraded: boolean;
+  /** assertWalkLegal 拒收（防御性兜底，正常完赛不可达）——与降级分流，勿混导向 */
+  rejected: boolean;
 }
 
 function GameScreen(props: {
@@ -140,6 +142,14 @@ function GameScreen(props: {
     onBackRef.current = props.onBack;
   }, [props.onBack]);
 
+  // 评审 I-1：完赛收尾 effect 的 dep 提为 phase（非可选链写法，eslint exhaustive-deps
+  // 口径内），run 本体走 ref——running 期 rAF 每帧换 run 引用，不再把完赛 effect 每帧拽重入。
+  const phase = run === null ? null : run.phase;
+  const runRef = useRef<RunState | null>(run);
+  useEffect(() => {
+    runRef.current = run; // 每渲染同步，声明序先于 rAF/完赛 effect，同 commit 内先落地
+  });
+
   // 进图读档：幽灵在位/旧版封存（裁定 10）
   useEffect(() => {
     if (maze === null) return;
@@ -162,7 +172,7 @@ function GameScreen(props: {
   // rAF 渲染层连续化：running 时把 nowMs 注入 RunState（HUD 活表 + 幽灵离散取位）；
   // 引擎步进仍只在 playerInput（键盘/触屏），rAF 不产生步。
   useEffect(() => {
-    if (run === null || run.phase !== "running") return;
+    if (phase !== "running") return;
     let raf = 0;
     const tick = () => {
       setRun((r) =>
@@ -172,7 +182,7 @@ function GameScreen(props: {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [run?.phase]);
+  }, [phase]);
 
   // 键盘：WASD + 方向键 + Esc（窗口事件路径零依赖限界不写 RTL 测试——snake 先例豁免）
   useEffect(() => {
@@ -191,29 +201,34 @@ function GameScreen(props: {
     return () => window.removeEventListener("keydown", onKey);
   }, [inputDir]);
 
-  // 完赛收尾：认证先于入档；入档后重查驱动成绩面
+  // 完赛收尾：认证先于入档；入档后重查驱动成绩面（deps 只到 phase，run 走 runRef——评审 I-1）
   useEffect(() => {
-    if (maze === null || run === null || run.phase !== "finished") return;
-    if (savedRunRef.current === run) return; // StrictMode 防重
-    savedRunRef.current = run;
+    if (maze === null || phase !== "finished") return;
+    const cur = runRef.current;
+    if (cur === null || cur.phase !== "finished") return;
+    if (savedRunRef.current === cur) return; // StrictMode 防重
+    savedRunRef.current = cur;
 
-    const result = run.result ?? 0;
+    const result = cur.result ?? 0;
     const prevGhost = ghost;
+    let rejected = false;
     try {
-      assertWalkLegal(maze.spec, run.steps, result); // 认证机构：不过即拒收不入档
+      assertWalkLegal(maze.spec, cur.steps, result); // 认证机构：不过即拒收不入档
       saveGhost(
         storage,
         {
           packNo: maze.packNo,
           mapIndex: maze.mapIndex,
           gridHash: gridHash(maze.spec.grid),
-          steps: run.steps,
+          steps: cur.steps,
           result: { time: result },
         },
         Date.now(),
       );
     } catch {
-      // 认证拒收：不入档（引擎墙阻下正常完赛不会走到这，防御性兜底）
+      // 认证拒收：不入档（引擎墙阻下正常完赛不会走到这，防御性兜底）。
+      // 拒收≠降级（评审 I-2）：rejected 单列分流，不落「浏览器存储降级」误导文案。
+      rejected = true;
     }
     // 重查（静默降级也以重查为准——Task 5 挂账收口）
     const { ghost: nextGhost, sealed: nextSealed } = compareGhost(
@@ -231,9 +246,10 @@ function GameScreen(props: {
       result,
       pb: prevGhost,
       beatPb: savedThis && prevGhost !== null,
-      degraded: shouldSave && !savedThis,
+      degraded: shouldSave && !savedThis && !rejected,
+      rejected,
     });
-  }, [maze, run, storage, ghost]);
+  }, [maze, phase, storage, ghost]);
 
   if (maze === null) {
     return (
@@ -296,10 +312,16 @@ function GameScreen(props: {
             onRetry={retry}
             onBack={props.onBack}
           />
-          {finish.degraded && (
-            <p className="mt-1 text-xs text-amber-400">
-              入档暂不可用（浏览器存储降级），成绩仅本局可见
+          {finish.rejected ? (
+            <p className="mt-1 text-xs text-red-400">
+              走线认证未通过，本局不入档
             </p>
+          ) : (
+            finish.degraded && (
+              <p className="mt-1 text-xs text-amber-400">
+                入档暂不可用（浏览器存储降级），成绩仅本局可见
+              </p>
+            )
           )}
         </div>
       )}

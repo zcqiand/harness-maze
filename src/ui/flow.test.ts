@@ -8,7 +8,7 @@
 import { describe, expect, it } from "vitest";
 import { generatePack } from "../lib/generator";
 import { gridHash, type Cell, type MapSpec } from "../lib/map";
-import { createRun, playerInput, type Dir } from "../lib/engine";
+import { createRun, playerInput, REPEAT_MS, type Dir } from "../lib/engine";
 import { assertWalkLegal, WalkViolationError } from "../lib/walk";
 import { compareGhost, loadRecords, saveGhost } from "../lib/ghosts";
 import { MemoryStorage } from "../lib/storage";
@@ -65,7 +65,7 @@ describe("端到端 lib 流（认证先于入档）", () => {
     expect(path[0]).toEqual(spec.start);
     expect(path[path.length - 1]).toEqual(spec.goal);
 
-    const TICK = 140; // REPEAT_MS 节拍
+    const TICK = REPEAT_MS; // 引擎连走节拍单源（评审 I-3：不硬编码，引擎调拍不漂移）
     const T0 = 1000;
     let run = createRun(spec);
     for (let i = 1; i < path.length; i++) {
@@ -106,7 +106,7 @@ describe("端到端 lib 流（认证先于入档）", () => {
     const path = bfsPath(spec);
     let run = createRun(spec);
     for (let i = 1; i < path.length; i++) {
-      run = playerInput(run, dirOf(path[i - 1]!, path[i]!), 1000 + i * 140);
+      run = playerInput(run, dirOf(path[i - 1]!, path[i]!), 1000 + i * REPEAT_MS);
     }
     expect(run.phase).toBe("finished");
 
