@@ -1,6 +1,16 @@
 {
-  "note": "版本钉死 SSOT。Godot 版本按书 ch4 口径：安装实测后回填实测回执。",
+  "note": "版本钉死 SSOT。依赖升版必须先改此文件并同批跑门。2026-11-18 人裁 maze 换栈 React，Godot 槽让渡 jumper/cardbattle。",
+  "npm_registry": "https://registry.npmmirror.com",
   "version_lock": {
-    "godot": "4.x（ch4 安装实测后回填具体版号与安装回执路径）"
+    "node": ">=24.15",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5",
+    "@vitejs/plugin-react": "^4.5.0",
+    "tailwindcss": "^4.1.7",
+    "@tailwindcss/vite": "^4.1.7",
+    "vitest": "^3.2.4",
+    "@types/node": "^24.0.0"
   }
 }

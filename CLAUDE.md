@@ -5,28 +5,29 @@
 
 ## 项目定位
 
-Godot 迷宫探险游戏：ch9 落结构化地图规约（JSON 地图契约）+寻路断言+存档校验；ch16 v2 落程序化关卡生成器（难度规约+种子复现+无效关卡自检）。
+合法幽灵竞速迷宫（React + TypeScript H5）：ch9 落结构化地图规约（JSON 地图契约）+寻路断言+存档校验；ch16 v2 落程序化关卡生成器（难度规约+种子复现+无效关卡自检）。
 
 ## 铁律
 
-- **版本钉死**：Godot 版本以 `version-lock.json` 为准（ch4 安装实测后回填实测回执）；不引入 lock 外的插件
-- **TDD**：寻路/地图解析/存档校验等纯逻辑先写断言脚本 → 确认失败 → 实现 → 确认绿 → commit（headless 跑，无 Key 无网）
-- **地图契约化**：地图必须从 `data/levels/` JSON 加载，禁止硬编码到 GDScript；存档写入先临时文件再替换（原子性）
-- **零伪代码**：禁止 `pass`/`TODO` 占位，每段代码必须可运行
+- **版本钉死**：依赖与 `version-lock.json` 的 `version_lock` 一致；不引入 lock 外的库；npm 一律走 `registry.npmmirror.com`
+- **TDD**：寻路/地图解析/存档校验等纯逻辑先写失败测试 → 确认失败 → 实现 → 确认绿 → commit；`npm test` 无 Key、无网全绿
+- **地图契约化**：地图必须从 `data/levels/` JSON 加载，禁止硬编码到组件逻辑
+- **存档原子性**：存档写入用双键版本化切换（新键写成功后再翻转读键），禁止半写状态
+- **零伪代码**：禁止 `TODO`/`...` 占位，每段代码必须可运行
 - **只增不改**：随章节扩仓不动现有模块签名/行为
 
 ## 验收
 
 ```bash
-godot --headless --path . --quit   # 工程可被 Godot 正常导入解析（ch4 Godot 装机后启用）
+npm install --registry=https://registry.npmmirror.com
+npm run build    # tsc strict + vite 构建门
+npm test         # vitest 断言门
 ```
-
-GDScript 侧断言脚本随 ch9 章节落（headless 场景跑断言）。本机无 Godot 时，工程结构以 ch4 实测为准补验。
 
 ## 正式区 / 临时区（2026-10-24 人定，全产品线通用）
 
 - 过程件（关卡实验、种子实验记录、调试日志）进 `_work/`，不与正式件混放
-- 正式区同名正式件有且仅有一个；`_work/` 整目录 .gitignore；`.godot/` 为可再生件，gitignore
+- 正式区同名正式件有且仅有一个；`_work/` 整目录 .gitignore；`dist/`、`node_modules/` 为可再生件，gitignore
 
 ## 细则（docs/conventions/，按需引用）
 
