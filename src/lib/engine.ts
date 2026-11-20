@@ -45,6 +45,7 @@ function isWall(grid: number[][], cell: Cell): boolean {
   return grid[cell.r]?.[cell.c] !== 0;
 }
 
+/** @impl M02.F01.I01 */
 export function createRun(spec: MapSpec): RunState {
   return { phase: "ready", spec, cell: spec.start, steps: [], startedAt: null, nowMs: 0, result: null };
 }
@@ -101,6 +102,7 @@ export function playerInput(run: RunState, dir: Dir, nowMs: number): RunState {
  * 幽灵离散驱动：最近一个 t<=elapsedMs 的步位；无步/elapsed 在首步前→start；
  * 越末→末步位。离散语义，渲染插值归 UI。
  */
+/** @impl M02.F02.I01 */
 export function ghostCellAt(steps: readonly Step[], elapsedMs: number, start: Cell): Cell {
   let found: Cell | null = null;
   for (const s of steps) {

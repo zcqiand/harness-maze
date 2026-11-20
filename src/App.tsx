@@ -5,7 +5,7 @@
 // playerInput；rAF 只做渲染层连续化（nowMs 注入 HUD / 幽灵 ghostCellAt 离散取位 + CSS
 // transition 滑行）。完赛先 assertWalkLegal 认证、通过才 saveGhost（认证先于入档），
 // 入档后重查 loadRecords+compareGhost 驱动成绩面（Task 5 挂账：静默降级以重查为准）。
-// Esc=放弃回选图不计档（裁定 2）。UI 层是唯一 Date.now 允许地。
+// Esc=放弃回选图不计档（裁定 2）。UI 层是唯一 Date.now 允许地。 @impl M04.F01.I01
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { JSX } from "react";
@@ -87,7 +87,7 @@ function MazeScreen(props: {
   );
 }
 
-/** WASD + 方向键 → Dir（keydown 原生 repeat 连走，不做额外队列——裁定 1） */
+/** WASD + 方向键 → Dir（keydown 原生 repeat 连走，不做额外队列——裁定 1） @impl M04.F01.I02 */
 const KEY_DIR: Record<string, Dir> = {
   w: "up",
   W: "up",

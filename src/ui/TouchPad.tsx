@@ -1,5 +1,5 @@
 // 触屏四向（Task 8，纯渲染）：四向按钮挂 data-fn="dpad-up|down|left|right"
-//（面向用户功能触发元素挂 data-fn 的仓纪律），方向经 onDir 回调出。
+//（面向用户功能触发元素挂 data-fn 的仓纪律），方向经 onDir 回调出。 @impl M05.F03.I01
 
 import type { JSX } from "react";
 import type { Dir } from "../lib/engine";

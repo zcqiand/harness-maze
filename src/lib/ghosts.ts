@@ -49,7 +49,7 @@ export function recordChecksum(rec: Omit<GhostRecord, "checksum">): string {
   return fnv1a32(stableStringify(rec));
 }
 
-/** 无记录 → true；更快 → true；更慢 / 平局 → false（平局先到先得）。 */
+/** 无记录 → true；更快 → true；更慢 / 平局 → false（平局先到先得）。 @impl M03.F03.I01 */
 export function isPersonalBest(existing: GhostRecord | undefined, time: number): boolean {
   if (existing === undefined) return true;
   return time < existing.result.time;
@@ -142,7 +142,7 @@ export function loadRecords(storage: Storage): Map<string, GhostRecord> {
 
 // ---------- 写入侧 ----------
 
-/** 计 checksum+savedAt；已有 PB 更快才覆盖（平局先到先得）；双键原子写，任一步失败静默降级不抛。 */
+/** 计 checksum+savedAt；已有 PB 更快才覆盖（平局先到先得）；双键原子写，任一步失败静默降级不抛。 @impl M03.F02.I01 */
 export function saveGhost(
   storage: Storage,
   rec: Omit<GhostRecord, "checksum" | "savedAt">,

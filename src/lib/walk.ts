@@ -44,7 +44,7 @@ function outOfBounds(grid: number[][], cell: Cell): boolean {
   return !(cell.r >= 0 && cell.r < grid.length && cell.c >= 0 && cell.c < grid[cell.r]!.length);
 }
 
-/** 合法返回静默通过；违规抛 WalkViolationError（message 带步号与 reason）。 */
+/** 合法返回静默通过；违规抛 WalkViolationError（message 带步号与 reason）。 @impl M02.F03.I01 */
 export function assertWalkLegal(spec: MapSpec, steps: readonly Step[], resultTime: number): void {
   if (steps.length === 0) {
     throw new WalkViolationError(-1, "empty");

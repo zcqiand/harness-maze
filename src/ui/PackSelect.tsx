@@ -1,5 +1,5 @@
 // 选包屏（纯渲染）：包号 1..5 直列 + 自定义输入框。
-// 自定义输入经 isValidPackNo 守卫——非法回落不动（裁定 14）：不抛错、不跳转，玩家原地改。
+// 自定义输入经 isValidPackNo 守卫——非法回落不动（裁定 14）：不抛错、不跳转，玩家原地改。 @impl M04.F02.I01
 // 不碰 storage / generator，包号选择只经 onSelectPack 回调出（App 注入）。
 
 import { useState } from "react";

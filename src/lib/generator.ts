@@ -11,6 +11,7 @@ import {
 export const MAPS_PER_PACK = 5;
 
 /** Number.isInteger && n >= 1（UI 层守卫用；generatePack 内部另有 fail-fast） */
+/** @impl M01.F03.I01 */
 export function isValidPackNo(n: number): boolean {
   return Number.isInteger(n) && n >= 1;
 }
@@ -129,6 +130,7 @@ function generateOne(packNo: number, mapIndex: number, size: number): PackMaze {
 }
 
 /** 非法包号抛 RangeError（UI 层先用 isValidPackNo 守卫） */
+/** @impl M01.F01.I01 */
 export function generatePack(packNo: number): PackMaze[] {
   if (!isValidPackNo(packNo)) {
     throw new RangeError(`invalid packNo: ${packNo}`);

@@ -1,5 +1,5 @@
 // 选图屏（纯渲染）：5 张图卡片 = 名称 + 尺寸 + 最佳时间 + 幽灵在位标记。
-// sealed 卡片标「旧版」并禁点（裁定 10：不可赛不可记档）；其余可点，经 onSelect 回调出。
+// sealed 卡片标「旧版」并禁点（裁定 10：不可赛不可记档）；其余可点，经 onSelect 回调出。 @impl M04.F03.I01
 // 视图模型由 App 计算（generatePack + compareGhost 注入），组件不碰 storage / generator。
 
 import type { JSX } from "react";

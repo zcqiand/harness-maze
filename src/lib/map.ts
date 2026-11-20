@@ -23,7 +23,7 @@ export type MapSpecError =
   | "start-equals-goal"
   | "unsolvable";
 
-/** 按枚举顺序短路返回首个错误；合法返回 null。 */
+/** 按枚举顺序短路返回首个错误；合法返回 null。 @impl M01.F02.I01 */
 export function validateMapSpec(spec: MapSpec): MapSpecError | null {
   const { grid, start, goal } = spec;
 
@@ -79,6 +79,7 @@ export function gridHash(grid: number[][]): string {
 }
 
 /** 四向 BFS 判 start→goal 连通性；防环用 visited 集合。 */
+/** @impl M01.F02.I02 */
 export function bfsSolvable(spec: MapSpec): boolean {
   const { grid, start, goal } = spec;
   const rows = grid.length;

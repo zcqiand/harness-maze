@@ -45,7 +45,7 @@ function memoryStorage(): MemoryStorage {
 
 const PROBE_KEY = "__hmaze_probe__";
 
-/** try globalThis.localStorage 探活（setItem+removeItem 回环）；成功返回真件，否则 MemoryStorage 单例。 */
+/** try globalThis.localStorage 探活（setItem+removeItem 回环）；成功返回真件，否则 MemoryStorage 单例。 @impl M03.F01.I01 */
 export function safeLocalStorage(): Storage {
   try {
     const s = (globalThis as { localStorage?: Storage | null }).localStorage;

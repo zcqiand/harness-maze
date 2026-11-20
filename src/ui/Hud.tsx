@@ -1,5 +1,5 @@
 // 计时 HUD（Task 8，纯渲染）：ready=0.000 待出发；running=nowMs-startedAt（App 的
-// rAF 把 nowMs 注入 RunState，本组件只读）；finished=完赛时间。
+// rAF 把 nowMs 注入 RunState，本组件只读）；finished=完赛时间。 @impl M05.F02.I01
 
 import type { JSX } from "react";
 import type { RunState } from "../lib/engine";
